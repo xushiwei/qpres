@@ -24,7 +24,7 @@ var (
 	httpAddr      = flag.String("http", "127.0.0.1:3999", "HTTP service address (e.g., '127.0.0.1:3999')")
 	originHost    = flag.String("orighost", "", "host component of web origin URL (e.g., 'localhost')")
 	basePath      = flag.String("base", "", "base path for slide template and static resources")
-	contentPath   = flag.String("content", ".", "base path for presentation content")
+	contentPath   = flag.String("content", "./content/", "base path for presentation content")
 	usePlayground = flag.Bool("use_playground", false, "run code snippets using play.golang.org; if false, run them locally and deliver results by WebSocket transport")
 	nativeClient  = flag.Bool("nacl", false, "use Native Client environment playground (prevents non-Go code execution) when using local WebSocket transport")
 )
