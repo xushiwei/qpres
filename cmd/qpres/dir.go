@@ -22,6 +22,40 @@ func init() {
 	http.HandleFunc("/", dirHandler)
 }
 
+// --------------------------------------------------------------------------
+
+func toHTTPError(err error) (msg string, httpStatus int) {
+	if os.IsNotExist(err) {
+		return "404 page not found", http.StatusNotFound
+	}
+	if os.IsPermission(err) {
+		return "403 Forbidden", http.StatusForbidden
+	}
+	// Default:
+	return "500 Internal Server Error", http.StatusInternalServerError
+}
+
+func serveFile(w http.ResponseWriter, r *http.Request, realName, aliasName string) {
+	f, err := os.Open(realName)
+	if err != nil {
+		msg, code := toHTTPError(err)
+		http.Error(w, msg, code)
+		return
+	}
+	defer f.Close()
+
+	d, err := f.Stat()
+	if err != nil {
+		msg, code := toHTTPError(err)
+		http.Error(w, msg, code)
+		return
+	}
+
+	http.ServeContent(w, r, aliasName, d.ModTime(), f)
+}
+
+// --------------------------------------------------------------------------
+
 // dirHandler serves a directory listing for the requested path, rooted at *contentPath.
 func dirHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/favicon.ico" {
@@ -35,6 +69,11 @@ func dirHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+		return
+	}
+	ext := filepath.Ext(name)
+	if ext == ".m4a" {
+		serveFile(w, r, name, ".mp4")
 		return
 	}
 	if isDir, err := dirList(w, name); err != nil {
