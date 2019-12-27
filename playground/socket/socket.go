@@ -43,7 +43,7 @@ var RunScripts = true
 
 // Environ provides an environment when a binary, such as the go tool, is
 // invoked.
-var Environ func() []string = os.Environ
+var Environ = os.Environ
 
 const (
 	// The maximum number of messages to send per session (avoid flooding).
